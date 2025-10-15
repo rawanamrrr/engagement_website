@@ -8,16 +8,17 @@ interface VideoIntroProps {
 }
 
 export default function VideoIntro({ onComplete, onSkip }: VideoIntroProps) {
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [showPlayButton, setShowPlayButton] = useState(true)
-  const [isIOS, setIsIOS] = useState(false)
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
 
   useEffect(() => {
     // Check if iOS
     const userAgent = window.navigator.userAgent;
-    const isIOSDevice = /iPad|iPhone|iPod/.test(userAgent) || 
-                       (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const isIOSDevice = typeof navigator !== 'undefined' && (
+      /iPad|iPhone|iPod/.test(userAgent) || 
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+    );
     setIsIOS(isIOSDevice);
   }, []);
 
@@ -26,32 +27,39 @@ export default function VideoIntro({ onComplete, onSkip }: VideoIntroProps) {
     if (!video) return;
 
     try {
+      video.muted = true; // Ensure video is muted for autoplay
       await video.play();
       setIsPlaying(true);
-      setShowPlayButton(false);
     } catch (error) {
       console.error("Error playing video:", error);
-      setShowPlayButton(true);
     }
   };
 
-  // Handle the case where autoplay might work
+  // Handle autoplay on mount for non-iOS devices
   useEffect(() => {
+    if (isIOS) return; // iOS requires user interaction to play videos
+    
     const video = videoRef.current;
-    if (!video || isIOS) return;
+    if (!video) return;
 
-    const tryAutoplay = async () => {
+    const playVideo = async () => {
       try {
+        video.muted = true;
         await video.play();
         setIsPlaying(true);
-        setShowPlayButton(false);
-      } catch (err) {
-        console.log("Autoplay prevented, showing play button");
-        setShowPlayButton(true);
+      } catch (error) {
+        console.log("Autoplay prevented:", error);
       }
     };
 
-    tryAutoplay();
+    playVideo();
+    
+    // Cleanup function
+    return () => {
+      if (video && !video.paused) {
+        video.pause();
+      }
+    };
   }, [isIOS]);
 
   return (
@@ -68,42 +76,34 @@ export default function VideoIntro({ onComplete, onSkip }: VideoIntroProps) {
       <video 
         ref={videoRef}
         className="w-full h-full object-contain"
-        playsInline 
-        muted 
-        autoPlay
-        preload="auto"
+        playsInline={true}
+        muted={true}
+        autoPlay={true}
+        // @ts-ignore - These are valid HTML attributes that TypeScript doesn't know about
         webkit-playsinline="true"
         x5-playsinline="true"
         x5-video-player-type="h5"
-        x5-video-player-fullscreen="true"
+        x5-video-player-fullscreen="false"
         x5-video-orientation="portrait"
+        // @ts-ignore
+        disablePictureInPicture
+        preload="auto"
         onEnded={onComplete}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          objectFit: 'contain',
+          backgroundColor: 'black'
+        }}
+        onPlay={() => setIsPlaying(true)}
+        onPause={() => setIsPlaying(false)}
       >
         <source src="/engagement-video.mp4" type="video/mp4" />
         Your browser does not support the video tag.
       </video>
-      
-      {/* Play button overlay */}
-      {showPlayButton && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-          <button 
-            className="w-24 h-24 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center"
-            aria-label="Play video"
-            onClick={(e) => {
-              e.stopPropagation();
-              handlePlay();
-            }}
-          >
-            <svg 
-              className="w-16 h-16 text-white" 
-              fill="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path d="M8 5v14l11-7z" />
-            </svg>
-          </button>
-        </div>
-      )}
     </div>
   );
 }

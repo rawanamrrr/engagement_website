@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { motion, useScroll, useTransform } from "framer-motion"
 import CountdownTimer from "@/components/countdown-timer"
 import VenueMap from "@/components/venue-map"
@@ -70,21 +70,51 @@ interface ProAnimatedEngagementPageProps {
 }
 
 export default function ProAnimatedEngagementPage({ onImageLoad }: ProAnimatedEngagementPageProps) {
+  const t = useTranslation()
+  const { language } = useLanguage()
   const [mounted, setMounted] = useState(false)
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const { scrollY } = useScroll();
-  const y1 = useTransform(scrollY, [0, 300], [0, 100]);
-  const y2 = useTransform(scrollY, [0, 300], [0, -100]);
-  const { language } = useLanguage();
-  const t = useTranslation();
+  const [imageLoaded, setImageLoaded] = useState(false)
+  const [gifHasPlayed, setGifHasPlayed] = useState(false)
+  const gifRef = useRef<HTMLImageElement>(null)
+  const { scrollYProgress } = useScroll()
+  const scale = useTransform(scrollYProgress, [0, 0.5], [1, 1.05])
+  
+  const opacity = useTransform(scrollYProgress, [0, 0.1], [1, 0])
+  const y = useTransform(scrollYProgress, [0, 0.1], [0, -20])
+  
+  // Animation values for the path
+  const pathLength = useTransform(scrollYProgress, [0, 0.5], [0, 1])
+  const pathY1 = useTransform(scrollYProgress, [0, 0.5], [0, 20])
+  const pathY2 = useTransform(scrollYProgress, [0, 0.5], [0, 40])
   
   const eventDate = new Date("2025-11-07T19:00:00");
   const formattedDate = formatDate(eventDate, language);
   const formattedTime = formatTime(eventDate, language);
 
+  // Check if we've already shown the GIF in this session
   useEffect(() => {
-    setMounted(true)
-  }, [])
+    setMounted(true);
+    
+    // Check if we've already shown the GIF
+    const hasShownGif = typeof window !== 'undefined' && localStorage.getItem('gifHasPlayed') === 'true';
+    if (hasShownGif) {
+      setGifHasPlayed(true);
+    }
+    
+    // Preload the static image
+    if (typeof window !== 'undefined') {
+      const img = new window.Image();
+      img.src = "/invitation-design.png";
+    }
+  }, []);
+
+  // Handle GIF end
+  const handleGifEnd = () => {
+    setGifHasPlayed(true);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('gifHasPlayed', 'true');
+    }
+  };
 
   const handleImageLoad = () => {
     setImageLoaded(true)
@@ -114,18 +144,49 @@ export default function ProAnimatedEngagementPage({ onImageLoad }: ProAnimatedEn
         >
           {/* Optimized Image with immediate loading */}
           <div className="relative w-full h-auto">
-            <Image
-              src="/invitation-design.png"
-              alt="Zeyad & Rawan Engagement Invitation"
-              width={768}
-              height={1365}
-              className="w-full h-auto rounded-lg shadow-2xl"
-              priority
-              loading="eager"
-              quality={80}
-              onLoad={handleImageLoad}
-              sizes="(max-width: 640px) 100vw, (max-width: 768px) 90vw, (max-width: 1200px) 80vw, 70vw"
-            />
+            {gifHasPlayed ? (
+              <Image
+                key="static-image"
+                src="/invitation-design.png"
+                alt="Zeyad & Rawan Engagement Invitation"
+                width={768}
+                height={1365}
+                className="w-full h-auto rounded-lg shadow-2xl"
+                priority
+                loading="eager"
+                quality={80}
+                onLoad={handleImageLoad}
+                sizes="(max-width: 640px) 100vw, (max-width: 768px) 90vw, (max-width: 1200px) 80vw, 70vw"
+              />
+            ) : (
+              <img
+                key="animated-gif"
+                ref={gifRef}
+                src="/invitation-design.gif"
+                alt="Zeyad & Rawan Engagement Invitation"
+                className="w-full h-auto rounded-lg shadow-2xl"
+                onLoad={() => {
+                  handleImageLoad();
+                  // Force the GIF to play only once by reloading it after a short delay
+                  // This ensures it doesn't loop on desktop
+                  const gif = gifRef.current;
+                  if (gif) {
+                    const originalSrc = gif.src;
+                    const duration = 5000; // Adjust this to match your GIF's duration
+                    
+                    // Set a timeout to switch to the static image after the GIF finishes playing
+                    const timer = setTimeout(() => {
+                      handleGifEnd();
+                    }, duration);
+
+                    // Cleanup function to clear the timer if component unmounts
+                    return () => clearTimeout(timer);
+                  }
+                }}
+                onError={handleGifEnd}
+                style={{ display: 'block' }}
+              />
+            )}
             
             {/* Minimal loading state */}
             {!imageLoaded && (
@@ -142,11 +203,11 @@ export default function ProAnimatedEngagementPage({ onImageLoad }: ProAnimatedEn
         {/* Subtle parallax background elements */}
         <motion.div 
           className="absolute -left-20 top-1/4 w-64 h-64 bg-accent/5 rounded-full mix-blend-multiply filter blur-3xl"
-          style={{ y: y1 }}
+          style={{ y: pathY1 }}
         />
         <motion.div 
           className="absolute -right-20 bottom-1/4 w-72 h-72 bg-accent/5 rounded-full mix-blend-multiply filter blur-3xl"
-          style={{ y: y2 }}
+          style={{ y: pathY2 }}
         />
       </motion.section>
 

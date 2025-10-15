@@ -92,7 +92,6 @@ export default function VenueMap() {
               {isRTL ? 'ديڤا جاردن' : 'Diva Garden'}
             </h3>
             <p className="text-muted-foreground text-base sm:text-lg mb-3">
-              {isRTL ? 'قاعة أفراح ومناسبات' : 'Wedding Venue & Event Space'}
             </p>
             <div className="flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
               <div className="flex items-center gap-2">

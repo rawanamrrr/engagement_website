@@ -19,7 +19,7 @@ const playfair = Playfair_Display({
 export const metadata: Metadata = {
   title: "Welcome to Our Beginning",
   description: "Celebrating the start of our journey together",
-  generator: "v0.app",
+  generator: "Digitiva",
 }
 
 export default function RootLayout({

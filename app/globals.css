@@ -1,6 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
+
+/* Arabic font class */
+.font-arabic {
+  font-family: 'Noto Naskh Arabic', serif;
+}
 
 /* Dark mode is configured in tailwind.config.js */
 

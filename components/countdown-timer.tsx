@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useTranslation } from "@/lib/translations"
 
 interface CountdownTimerProps {
   targetDate: Date
@@ -14,6 +15,7 @@ interface TimeLeft {
 }
 
 export default function CountdownTimer({ targetDate }: CountdownTimerProps) {
+  const t = useTranslation()
   const [timeLeft, setTimeLeft] = useState<TimeLeft>({
     days: 0,
     hours: 0,
@@ -42,24 +44,23 @@ export default function CountdownTimer({ targetDate }: CountdownTimerProps) {
   }, [targetDate])
 
   const timeUnits = [
-    { label: "Days", value: timeLeft.days },
-    { label: "Hours", value: timeLeft.hours },
-    { label: "Minutes", value: timeLeft.minutes },
-    { label: "Seconds", value: timeLeft.seconds },
+    { key: 'days', value: timeLeft.days },
+    { key: 'hours', value: timeLeft.hours },
+    { key: 'minutes', value: timeLeft.minutes },
+    { key: 'seconds', value: timeLeft.seconds },
   ]
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
       {timeUnits.map((unit, index) => (
         <div
-          key={unit.label}
+          key={unit.key}
           className="group relative"
           style={{
             animation: `fadeInUp 0.6s ease-out ${index * 0.1}s both`,
           }}
         >
           <div className="relative flex flex-col items-center justify-center p-6 md:p-8 bg-card/80 backdrop-blur-sm border-2 border-accent/20 rounded-2xl shadow-lg hover:shadow-2xl hover:border-accent/40 transition-all duration-300 hover:-translate-y-1">
-            {/* Decorative corner elements */}
             <div className="absolute top-2 left-2 w-3 h-3 border-t-2 border-l-2 border-accent/30 rounded-tl-lg" />
             <div className="absolute top-2 right-2 w-3 h-3 border-t-2 border-r-2 border-accent/30 rounded-tr-lg" />
             <div className="absolute bottom-2 left-2 w-3 h-3 border-b-2 border-l-2 border-accent/30 rounded-bl-lg" />
@@ -69,7 +70,7 @@ export default function CountdownTimer({ targetDate }: CountdownTimerProps) {
               {unit.value.toString().padStart(2, "0")}
             </div>
             <div className="text-xs md:text-sm text-muted-foreground mt-3 uppercase tracking-widest font-light">
-              {unit.label}
+              {t(unit.key as any)}
             </div>
           </div>
         </div>

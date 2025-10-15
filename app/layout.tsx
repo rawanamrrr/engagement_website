@@ -5,6 +5,9 @@ import { GeistMono } from "geist/font/mono"
 import { Playfair_Display } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
+import { RomanticAudio } from "@/components/romantic-audio"
+import { LanguageProvider } from "@/contexts/LanguageContext"
+import { LanguageToggle } from "@/components/language-toggle"
 import "./globals.css"
 
 const playfair = Playfair_Display({
@@ -45,8 +48,14 @@ export default function RootLayout({
         />
       </head>
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable} ${playfair.variable}`}>
-        <Suspense fallback={null}>{children}</Suspense>
-        <Analytics />
+        <LanguageProvider>
+          <Suspense fallback={null}>
+            <LanguageToggle />
+            {children}
+            <RomanticAudio />
+          </Suspense>
+          <Analytics />
+        </LanguageProvider>
       </body>
     </html>
   )

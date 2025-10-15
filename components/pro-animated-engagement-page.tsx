@@ -7,6 +7,27 @@ import VenueMap from "@/components/venue-map"
 import Image from "next/image"
 import HandwrittenMessage from "@/components/handwritten-message"
 import { Variants } from "framer-motion"
+import { useTranslation } from "@/lib/translations"
+import { useLanguage } from "@/contexts/LanguageContext"
+import { Button } from "@/components/ui/button"
+
+// Format date in Arabic or English
+const formatDate = (date: Date, locale: string) => {
+  return date.toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+};
+
+// Format time in Arabic or English
+const formatTime = (date: Date, locale: string) => {
+  return date.toLocaleTimeString(locale === 'ar' ? 'ar-EG' : 'en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  });
+};
 
 // Professional animation variants
 const fadeIn: Variants = {
@@ -50,12 +71,16 @@ interface ProAnimatedEngagementPageProps {
 
 export default function ProAnimatedEngagementPage({ onImageLoad }: ProAnimatedEngagementPageProps) {
   const [mounted, setMounted] = useState(false)
-  const [imageLoaded, setImageLoaded] = useState(false)
-  const { scrollYProgress } = useScroll()
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const { scrollY } = useScroll();
+  const y1 = useTransform(scrollY, [0, 300], [0, 100]);
+  const y2 = useTransform(scrollY, [0, 300], [0, -100]);
+  const { language } = useLanguage();
+  const t = useTranslation();
   
-  // Parallax effects
-  const y1 = useTransform(scrollYProgress, [0, 1], [0, 100])
-  const y2 = useTransform(scrollYProgress, [0, 1], [0, 50])
+  const eventDate = new Date("2025-11-07T19:00:00");
+  const formattedDate = formatDate(eventDate, language);
+  const formattedTime = formatTime(eventDate, language);
 
   useEffect(() => {
     setMounted(true)
@@ -107,7 +132,7 @@ export default function ProAnimatedEngagementPage({ onImageLoad }: ProAnimatedEn
               <div className="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center">
                 <div className="flex flex-col items-center gap-2">
                   <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin"></div>
-                  <span className="text-sm text-muted-foreground">Loading invitation...</span>
+                  <span className="text-sm text-muted-foreground">{t('loading')}</span>
                 </div>
               </div>
             )}
@@ -140,10 +165,10 @@ export default function ProAnimatedEngagementPage({ onImageLoad }: ProAnimatedEn
           >
             <div className="w-16 h-px bg-accent/30 mb-6" />
             <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl text-foreground leading-tight mb-4">
-              Our Special Day
+              {t('ourSpecialDay')}
             </h2>
             <p className="text-lg md:text-xl text-muted-foreground font-light max-w-2xl">
-              Counting every moment until we celebrate together
+              {t('countingMoments')}
             </p>
           </motion.div>
 
@@ -168,7 +193,7 @@ export default function ProAnimatedEngagementPage({ onImageLoad }: ProAnimatedEn
           >
             <div className="w-16 h-px bg-accent/30 mx-auto mb-6" />
             <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl text-foreground leading-tight mb-4">
-              Join Us At
+              {t('joinUsAt')}
             </h2>
           </motion.div>
 
@@ -178,10 +203,10 @@ export default function ProAnimatedEngagementPage({ onImageLoad }: ProAnimatedEn
           >
             <div className="bg-card/50 backdrop-blur-sm border border-accent/10 rounded-2xl p-8 md:p-10 shadow-lg">
               <h3 className="text-3xl md:text-4xl font-serif text-foreground mb-2">
-                Diva Garden Hall
+                {t('location').split(', ')[0]}
               </h3>
               <p className="text-xl text-muted-foreground mb-8">
-                Talkha City
+                {t('location').split(', ')[1]}
               </p>
 
               <div className="flex flex-col md:flex-row items-center justify-center gap-6 pt-8 border-t border-accent/10">
@@ -194,7 +219,7 @@ export default function ProAnimatedEngagementPage({ onImageLoad }: ProAnimatedEn
                       d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                     />
                   </svg>
-                  <span className="text-foreground">November 7, 2025</span>
+                  <span className="text-foreground">{formattedDate}</span>
                 </div>
                 <div className="hidden md:block w-px h-6 bg-accent/20" />
                 <div className="flex items-center gap-3">
@@ -206,7 +231,7 @@ export default function ProAnimatedEngagementPage({ onImageLoad }: ProAnimatedEn
                       d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                     />
                   </svg>
-                  <span className="text-foreground">7:00 PM</span>
+                  <span className="text-foreground">{formattedTime}</span>
                 </div>
               </div>
             </div>
@@ -238,7 +263,7 @@ export default function ProAnimatedEngagementPage({ onImageLoad }: ProAnimatedEn
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            We can't wait to celebrate with you
+            {t('footerMessage')}
           </motion.p>
           <div className="flex items-center justify-center gap-3">
             <div className="w-12 h-px bg-accent/30" />
@@ -250,6 +275,7 @@ export default function ProAnimatedEngagementPage({ onImageLoad }: ProAnimatedEn
                 repeat: Infinity, 
                 ease: "easeInOut" 
               }}
+              style={{ fontFamily: 'Arial, sans-serif' }}
             >
               ♥
             </motion.span>

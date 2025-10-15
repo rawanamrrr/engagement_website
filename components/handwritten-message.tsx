@@ -2,8 +2,10 @@
 
 import { useRef, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { useTranslation } from '@/lib/translations';
 
 export default function HandwrittenMessage() {
+  const t = useTranslation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [lastX, setLastX] = useState(0);
@@ -11,27 +13,27 @@ export default function HandwrittenMessage() {
   const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null);
   const [name, setName] = useState('');
   const [isSending, setIsSending] = useState(false);
-  const [message, setMessage] = useState({ text: '', type: '' });
+  const [message, setMessage] = useState({ text: '', type: '' as 'success' | 'error' | 'info' | '' });
   const [currentColor, setCurrentColor] = useState('#000000');
   const [currentWidth, setCurrentWidth] = useState(3);
   const toEmail = 'zeyad5zoks@gmail.com';
 
-  // Pen color options
+  // Pen color options with translations
   const penColors = [
-    { color: '#000000', name: 'Black' },
-    { color: '#EF4444', name: 'Red' },
-    { color: '#3B82F6', name: 'Blue' },
-    { color: '#10B981', name: 'Green' },
-    { color: '#8B5CF6', name: 'Purple' },
-    { color: '#F59E0B', name: 'Orange' },
+    { color: '#000000', name: t('colorBlack') },
+    { color: '#EF4444', name: t('colorRed') },
+    { color: '#3B82F6', name: t('colorBlue') },
+    { color: '#10B981', name: t('colorGreen') },
+    { color: '#8B5CF6', name: t('colorPurple') },
+    { color: '#F59E0B', name: t('colorOrange') },
   ];
 
-  // Pen width options
+  // Pen width options with translations
   const penWidths = [
-    { width: 2, name: 'Thin' },
-    { width: 3, name: 'Medium' },
-    { width: 5, name: 'Thick' },
-    { width: 8, name: 'Bold' },
+    { width: 2, name: t('widthThin') },
+    { width: 3, name: t('widthMedium') },
+    { width: 5, name: t('widthThick') },
+    { width: 8, name: t('widthBold') },
   ];
 
   // Initialize canvas
@@ -40,16 +42,22 @@ export default function HandwrittenMessage() {
     if (!canvas) return;
 
     // Set canvas size
-    const setCanvasSize = () => {
+    const setCanvasSize = (isInitial = false) => {
       const container = canvas.parentElement;
       if (container) {
         const rect = container.getBoundingClientRect();
         const width = Math.min(1000, rect.width * 0.95); // Increased max width
-        canvas.width = width;
-        canvas.height = 600; // Increased height for larger writing area
+        // Only update canvas dimensions if they actually changed significantly
+        if (Math.abs(canvas.width - width) > 5 || canvas.height !== 600) {
+          canvas.width = width;
+          canvas.height = 600; // Increased height for larger writing area
+        }
         canvas.style.border = '2px solid #e5e7eb';
         canvas.style.borderRadius = '0.5rem';
-        canvas.style.backgroundColor = 'white';
+        // Only fill background on initial setup, not on resize
+        if (isInitial) {
+          canvas.style.backgroundColor = 'white';
+        }
       }
     };
 
@@ -61,15 +69,42 @@ export default function HandwrittenMessage() {
     context.lineCap = 'round';
     context.lineJoin = 'round';
     context.strokeStyle = currentColor;
+    // Only fill background on initial setup
     context.fillStyle = 'white';
     context.fillRect(0, 0, canvas.width, canvas.height);
-    
-    setCtx(context);
-    setCanvasSize();
 
-    const handleResize = () => setCanvasSize();
+    setCtx(context);
+    setCanvasSize(true); // Initial setup
+
+    const handleResize = () => setCanvasSize(false); // Resize without clearing
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+
+    // Debounced scroll handler to prevent excessive canvas operations
+    let scrollTimeout: NodeJS.Timeout;
+    const handleScroll = () => {
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        // Check if canvas size needs adjustment after scroll
+        const container = canvas.parentElement;
+        if (container) {
+          const rect = container.getBoundingClientRect();
+          const currentWidth = canvas.width;
+          const newWidth = Math.min(1000, rect.width * 0.95);
+          // Only resize if the width actually changed significantly
+          if (Math.abs(currentWidth - newWidth) > 10) {
+            setCanvasSize(false);
+          }
+        }
+      }, 100); // Debounce scroll events
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('scroll', handleScroll);
+      clearTimeout(scrollTimeout);
+    };
   }, []);
 
   // Update drawing context when color or width changes
@@ -253,17 +288,17 @@ export default function HandwrittenMessage() {
     e.preventDefault();
     
     if (!canvasRef.current) {
-      setMessage({ text: 'Canvas not available', type: 'error' });
+      setMessage({ text: t('messageError'), type: 'error' });
       return;
     }
     
     if (!name.trim()) {
-      setMessage({ text: 'Please enter your name', type: 'error' });
+      setMessage({ text: t('messageError'), type: 'error' });
       return;
     }
 
     setIsSending(true);
-    setMessage({ text: 'Sending your message...', type: 'info' });
+    setMessage({ text: t('sendingMessage'), type: 'info' });
 
     try {
       // Convert canvas to blob
@@ -309,8 +344,8 @@ export default function HandwrittenMessage() {
       }
 
       setMessage({ 
-        text: responseData.message || 'Message sent successfully! Thank you!', 
-        type: 'success' 
+        text: t('messageSent'),
+        type: 'success' as const
       });
       
       // Reset form if successful
@@ -320,7 +355,7 @@ export default function HandwrittenMessage() {
     } catch (error) {
       console.error('Error sending message:', error);
       setMessage({ 
-        text: error instanceof Error ? error.message : 'Failed to send message. Please try again later.', 
+        text: error instanceof Error ? error.message : t('messageError'), 
         type: 'error' 
       });
     } finally {
@@ -351,20 +386,20 @@ export default function HandwrittenMessage() {
             }
           }}
         >
-          <h2 className="text-3xl md:text-4xl font-serif font-medium mb-2 select-none">Write Us a Message</h2>
-          <p className="text-gray-600 text-center mb-4 select-none">Leave us a handwritten note - we'd love to see your personal touch!</p>
+          <h2 className="text-3xl md:text-4xl font-serif font-medium mb-2 select-none">{t('writeUsMessage')}</h2>
+          <p className="text-gray-600 text-center mb-4 select-none">{t('writeUsDescription')}</p>
           <div className="w-20 h-1 bg-accent mx-auto mb-6 select-none"></div>
           
           <div className="bg-white/90 p-6 md:p-8 rounded-lg shadow-lg select-none">
             <p className="text-gray-700 text-lg md:text-xl leading-relaxed mb-6 select-none">
-              Write your message below...
+              {t('yourMessage')}...
             </p>
             
             {/* Pen Options */}
             <div className="mb-6">
               <div className="flex flex-wrap gap-4 justify-center mb-4">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-gray-700">Color:</span>
+                  <span className="text-sm font-medium text-gray-700">{t('color')}:</span>
                   <div className="flex gap-1">
                     {penColors.map((pen) => (
                       <button
@@ -382,7 +417,7 @@ export default function HandwrittenMessage() {
                 </div>
                 
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-gray-700">Width:</span>
+                  <span className="text-sm font-medium text-gray-700">{t('width')}:</span>
                   <div className="flex gap-2">
                     {penWidths.map((pen) => (
                       <button
@@ -409,7 +444,7 @@ export default function HandwrittenMessage() {
                     className="w-4 h-4 rounded-full border border-gray-300"
                     style={{ backgroundColor: currentColor }}
                   />
-                  <span>Current: {penColors.find(p => p.color === currentColor)?.name}</span>
+                  <span>{t('current')}: {penColors.find(p => p.color === currentColor)?.name}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div 
@@ -419,7 +454,7 @@ export default function HandwrittenMessage() {
                       height: currentWidth * 2 
                     }}
                   />
-                  <span>Size: {penWidths.find(p => p.width === currentWidth)?.name}</span>
+                  <span>{t('size')}: {penWidths.find(p => p.width === currentWidth)?.name}</span>
                 </div>
               </div>
             </div>
@@ -437,12 +472,12 @@ export default function HandwrittenMessage() {
                 onMouseDown={startDrawing}
                 onMouseMove={draw}
                 onMouseUp={stopDrawing}
-                onMouseOut={stopDrawing}
+                onMouseLeave={stopDrawing}
                 onTouchStart={startDrawing}
                 onTouchMove={draw}
                 onTouchEnd={stopDrawing}
                 onTouchCancel={stopDrawing}
-                className="w-full h-[500px] bg-white touch-none cursor-crosshair select-none" // Increased height
+                className="w-full h-[500px] bg-white touch-none cursor-crosshair select-none"
                 style={{
                   touchAction: 'none',
                   WebkitUserSelect: 'none',
@@ -458,11 +493,11 @@ export default function HandwrittenMessage() {
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Your Name"
+                  placeholder={t('yourName')}
                   className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-transparent"
                   required
                 />
-                <p className="text-sm text-gray-500 mt-2">Your message will be sent to the couple</p>
+                <p className="text-sm text-gray-500 mt-2">{t('writeUsDescription')}</p>
               </div>
               
               <div className="flex justify-between items-center pt-2">
@@ -472,27 +507,27 @@ export default function HandwrittenMessage() {
                   className="px-6 py-3 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors font-medium"
                   disabled={isSending}
                 >
-                  Clear Canvas
+                  {t('clearDrawing')}
                 </button>
                 <button
                   type="submit"
                   className="px-8 py-3 text-white bg-accent rounded-md hover:bg-accent/90 disabled:opacity-50 transition-colors font-medium"
                   disabled={isSending}
                 >
-                  {isSending ? 'Sending...' : 'Send Message'}
+                  {isSending ? t('sendingMessage') : t('sendMessage')}
                 </button>
               </div>
-            </form>
 
-            {message.text && (
-              <div className={`mt-6 p-4 rounded-md text-center ${
-                message.type === 'error' ? 'bg-red-100 text-red-700 border border-red-200' : 
-                message.type === 'info' ? 'bg-blue-100 text-blue-700 border border-blue-200' : 
-                'bg-green-100 text-green-700 border border-green-200'
-              }`}>
-                {message.text}
-              </div>
-            )}
+              {message.text && (
+                <div className={`mt-6 p-4 rounded-md text-center ${
+                  message.type === 'error' ? 'bg-red-100 text-red-700 border border-red-200' : 
+                  message.type === 'info' ? 'bg-blue-100 text-blue-700 border border-blue-200' : 
+                  'bg-green-100 text-green-700 border border-green-200'
+                }`}>
+                  {message.text}
+                </div>
+              )}
+            </form>
           </div>
         </motion.div>
       </div>

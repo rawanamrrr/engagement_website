@@ -16,7 +16,6 @@ export default function HandwrittenMessage() {
   const [message, setMessage] = useState({ text: '', type: '' as 'success' | 'error' | 'info' | '' });
   const [currentColor, setCurrentColor] = useState('#000000');
   const [currentWidth, setCurrentWidth] = useState(3);
-  const toEmail = 'zeyad5zoks@gmail.com';
 
   // Pen color options with translations
   const penColors = [
@@ -317,7 +316,6 @@ export default function HandwrittenMessage() {
       formData.append('name', name.trim());
       formData.append('message', 'A new message from the engagement website');
       formData.append('image', blob, 'drawing.png');
-      formData.append('to_email', toEmail);
 
       // Send data to API route
       const response = await fetch('/api/send-email', {
@@ -325,17 +323,29 @@ export default function HandwrittenMessage() {
         body: formData,
       });
 
-      let responseData;
-      try {
-        responseData = await response.json();
-      } catch (e) {
-        console.error('Failed to parse JSON response:', e);
-        throw new Error('The server returned an invalid response');
+      // Try to parse JSON; if not JSON, fall back to text for better error visibility
+      const contentType = response.headers.get('content-type') || '';
+      let responseData: any = null;
+      if (contentType.includes('application/json')) {
+        try {
+          responseData = await response.json();
+        } catch (e) {
+          console.error('Failed to parse JSON response:', e);
+          const rawText = await response.text().catch(() => '');
+          responseData = { raw: rawText };
+        }
+      } else {
+        const rawText = await response.text().catch(() => '');
+        responseData = { raw: rawText };
       }
 
       if (!response.ok) {
-        console.error('Server error:', responseData);
-        throw new Error(responseData.error || responseData.message || 'Failed to send message');
+        console.error('Server error:', response.status, response.statusText, responseData);
+        const msg = responseData?.message
+          || responseData?.error
+          || (typeof responseData?.raw === 'string' && responseData.raw.trim() ? responseData.raw : '')
+          || 'Failed to send message';
+        throw new Error(msg);
       }
 
       if (!responseData.success) {

@@ -46,10 +46,10 @@ export default function MessageSection() {
                 Send us your message at:
               </p>
               <a 
-                href="mailto:your-email@example.com" 
+                href="mailto:engagementzeyadrawan@gmail.com" 
                 className="inline-block px-6 py-3 bg-accent text-white rounded-full hover:bg-accent/90 transition-colors duration-300"
               >
-                your-email@example.com
+                engagementzeyadrawan@gmail.com
               </a>
             </div>
           </div>

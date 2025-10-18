@@ -50,7 +50,8 @@ type TranslationKey =
   | 'widthThick'
   | 'widthBold'
   | 'current'
-  | 'size';
+  | 'size'
+  | 'copyright';
 
 type Translations = {
   [key in TranslationKey]: {
@@ -86,7 +87,7 @@ export const translations: Translations = {
   },
   location: {
     en: 'Diva Garden Hall, Talkha City',
-    ar: 'قاعة ديفا جاردن، مدينة طلخا',
+    ar: 'قاعة ديفا جاردن، طلخا',
   },
   rsvpTitle: {
     en: 'Will You Join Us?',
@@ -259,6 +260,10 @@ export const translations: Translations = {
   size: {
     en: 'Size',
     ar: 'الحجم',
+  },
+  copyright: {
+    en: 'All Rights Reserved. Made by',
+    ar: 'جميع الحقوق محفوظة. صنع بواسطة',
   },
 };
 

@@ -21,6 +21,7 @@ export default function Home() {
   const [mounted, setMounted] = useState(false)
   const [isImageLoaded, setIsImageLoaded] = useState(false)
   const [isVideoSkipped, setIsVideoSkipped] = useState(false)
+  const [introFinished, setIntroFinished] = useState(false)
 
   useEffect(() => {
     setMounted(true)
@@ -32,6 +33,7 @@ export default function Home() {
   }, [])
 
   const handleVideoComplete = useCallback(() => {
+    setIntroFinished(true)
     // Only proceed if the image is already loaded or we're skipping the video
     if (isImageLoaded || isVideoSkipped) {
       setShowMain(true)
@@ -41,13 +43,14 @@ export default function Home() {
   const handleImageLoad = useCallback(() => {
     setIsImageLoaded(true)
     // If video was already skipped, show main content now that image is loaded
-    if (isVideoSkipped) {
+    if (isVideoSkipped || introFinished) {
       setShowMain(true)
     }
-  }, [isVideoSkipped])
+  }, [isVideoSkipped, introFinished])
 
   const handleSkipVideo = useCallback(() => {
     setIsVideoSkipped(true)
+    setIntroFinished(true)
     // If image is already loaded, show main content immediately
     if (isImageLoaded) {
       setShowMain(true)
@@ -88,7 +91,7 @@ export default function Home() {
           showMain ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
       >
-        <ProAnimatedEngagementPage onImageLoad={handleImageLoad} />
+        <ProAnimatedEngagementPage onImageLoad={handleImageLoad} playGifTrigger={introFinished} />
       </div>
     </main>
   )

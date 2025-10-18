@@ -38,6 +38,13 @@ export default function RootLayout({
           as="image" 
           type="image/png"
         />
+        {/* Preload GIF with high priority to eliminate lag on Netlify */}
+        <link 
+          rel="preload" 
+          href="/invitation-design.gif" 
+          as="image" 
+          type="image/gif"
+        />
         {/* Preconnect to domains for faster loading */}
         <link rel="preconnect" href="https://maps.googleapis.com" />
         <link rel="preconnect" href="https://maps.gstatic.com" />

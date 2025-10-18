@@ -103,6 +103,7 @@ export default function ProAnimatedEngagementPage({ onImageLoad, playGifTrigger 
   const [mounted, setMounted] = useState(false)
   const [imageLoaded, setImageLoaded] = useState(false)
   const [gifHasPlayed, setGifHasPlayed] = useState(false)
+  const [gifPreloaded, setGifPreloaded] = useState(false)
   const gifRef = useRef<HTMLImageElement>(null)
   const gifTimerRef = useRef<NodeJS.Timeout | null>(null)
   const { scrollYProgress } = useScroll()
@@ -120,13 +121,26 @@ export default function ProAnimatedEngagementPage({ onImageLoad, playGifTrigger 
   const formattedDate = formatDate(eventDate, language);
   const formattedTime = formatTime(eventDate, language);
 
-  // On mount: preload static image
+  // On mount: preload both static image AND GIF for instant display
   useEffect(() => {
     setMounted(true);
 
     if (typeof window !== 'undefined') {
-      const img = new window.Image();
-      img.src = "/invitation-design.png";
+      // Preload static PNG
+      const staticImg = new window.Image();
+      staticImg.src = "/invitation-design.png";
+
+      // Aggressively preload GIF to avoid lag
+      const gifImg = new window.Image();
+      gifImg.src = "/invitation-design.gif";
+      gifImg.onload = () => {
+        console.log('✅ GIF preloaded and cached');
+        setGifPreloaded(true);
+      };
+      gifImg.onerror = () => {
+        console.log('⚠️ GIF preload failed, will use static image');
+        setGifHasPlayed(true); // Skip GIF if it fails to preload
+      };
     }
 
     // Cleanup timer on unmount
@@ -211,6 +225,8 @@ export default function ProAnimatedEngagementPage({ onImageLoad, playGifTrigger 
                   }}
                   onError={handleGifError}
                   style={{ display: 'block' }}
+                  fetchPriority="high"
+                  decoding="async"
                 />
               ) : (
                 <Image

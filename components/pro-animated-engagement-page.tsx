@@ -389,7 +389,7 @@ export default function ProAnimatedEngagementPage({ onImageLoad, playGifTrigger 
                   {t('location').split(', ')[1]}
                 </p>
 
-                <div className="flex flex-col md:flex-row items-center justify-center gap-8 pt-10 border-t-2 border-accent/20">
+                <div className="flex flex-col md:flex-row items-center justify-center gap-8 pt-10 pb-10 border-t-2 border-b-2 border-accent/20">
                   <motion.div 
                     className="flex items-center gap-4 bg-accent/10 px-6 py-3 rounded-full"
                     initial="hidden" whileInView="visible" viewport={{ once: true }} variants={slideFromLeft}
@@ -420,15 +420,16 @@ export default function ProAnimatedEngagementPage({ onImageLoad, playGifTrigger 
                     <span className="font-luxury text-lg text-foreground font-medium">{formattedTime}</span>
                   </motion.div>
                 </div>
+
+                {/* Map integrated inside the card */}
+                <motion.div
+                  className="mt-10"
+                  initial="hidden" whileInView="visible" viewport={{ once: true }} variants={scaleIn}
+                >
+                  <VenueMap />
+                </motion.div>
               </div>
             </div>
-          </motion.div>
-
-          <motion.div
-            className="mt-16"
-            initial="hidden" whileInView="visible" viewport={{ once: true }} variants={scaleIn}
-          >
-            <VenueMap />
           </motion.div>
           
         </div>

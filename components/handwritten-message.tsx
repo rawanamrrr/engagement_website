@@ -16,6 +16,7 @@ export default function HandwrittenMessage() {
   const [message, setMessage] = useState({ text: '', type: '' as 'success' | 'error' | 'info' | '' });
   const [currentColor, setCurrentColor] = useState('#000000');
   const [currentWidth, setCurrentWidth] = useState(3);
+  const [history, setHistory] = useState<string[]>([]);
 
   // Pen color options with translations
   const penColors = [
@@ -118,6 +119,7 @@ export default function HandwrittenMessage() {
   const points = useRef<Array<{x: number, y: number, pressure: number}>>([]);
   const rafId = useRef<number | null>(null);
   const lastWidth = useRef(currentWidth);
+  const hasDrawn = useRef(false);
 
   const getPressure = (e: Touch | MouseEvent | React.Touch | React.MouseEvent): number => {
     // Check if the device supports pressure (like iPad with Apple Pencil)
@@ -228,6 +230,7 @@ export default function HandwrittenMessage() {
     
     const pressure = getPressure('touches' in e ? e.touches[0] : e.nativeEvent);
     points.current = [{ x: coords.x, y: coords.y, pressure }];
+    hasDrawn.current = false;
     setIsDrawing(true);
     
     // Start the drawing loop
@@ -256,6 +259,7 @@ export default function HandwrittenMessage() {
     
     // Add the new point with scaled coordinates
     points.current.push({ x: coords.x, y: coords.y, pressure });
+    hasDrawn.current = true;
   };
 
   const stopDrawing = () => {
@@ -263,7 +267,15 @@ export default function HandwrittenMessage() {
       cancelAnimationFrame(rafId.current);
       rafId.current = null;
     }
+    
+    // Only save to history if actual drawing occurred (more than just a click)
+    if (hasDrawn.current && canvasRef.current) {
+      const dataUrl = canvasRef.current.toDataURL();
+      setHistory(prev => [...prev, dataUrl]);
+    }
+    
     points.current = [];
+    hasDrawn.current = false;
     setIsDrawing(false);
   };
 
@@ -281,6 +293,30 @@ export default function HandwrittenMessage() {
     ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+    setHistory([]);
+  };
+
+  const undoLastStroke = () => {
+    if (!canvasRef.current || !ctx || history.length === 0) return;
+    
+    // Remove the last state from history
+    const newHistory = [...history];
+    newHistory.pop();
+    setHistory(newHistory);
+    
+    // Clear the canvas
+    ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+    
+    // If there's a previous state, restore it
+    if (newHistory.length > 0) {
+      const img = new Image();
+      img.onload = () => {
+        ctx.drawImage(img, 0, 0);
+      };
+      img.src = newHistory[newHistory.length - 1];
+    }
   };
 
   const sendEmail = async (e: React.FormEvent) => {
@@ -361,6 +397,7 @@ export default function HandwrittenMessage() {
       // Reset form if successful
       clearCanvas();
       setName('');
+      setHistory([]);
       
     } catch (error) {
       console.error('Error sending message:', error);
@@ -511,17 +548,27 @@ export default function HandwrittenMessage() {
               </div>
               
               <div className="flex justify-between items-center pt-2">
-                <button
-                  type="button"
-                  onClick={clearCanvas}
-                  className="px-6 py-3 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors font-medium"
-                  disabled={isSending}
-                >
-                  {t('clearDrawing')}
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={undoLastStroke}
+                    className="px-6 py-3 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors font-medium disabled:opacity-50"
+                    disabled={isSending || history.length === 0}
+                  >
+                    {t('undo')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={clearCanvas}
+                    className="px-6 py-3 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors font-medium"
+                    disabled={isSending}
+                  >
+                    {t('clearDrawing')}
+                  </button>
+                </div>
                 <button
                   type="submit"
-                  className="px-8 py-3 text-white bg-accent rounded-md hover:bg-accent/90 disabled:opacity-50 transition-colors font-medium"
+                  className="px-8 py-3 text-white bg-accent rounded-md hover:bg-accent/90 disabled:opacity-50 transition-colors font-medium whitespace-nowrap"
                   disabled={isSending}
                 >
                   {isSending ? t('sendingMessage') : t('sendMessage')}

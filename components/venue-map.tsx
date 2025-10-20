@@ -74,13 +74,6 @@ export default function VenueMap() {
                 </div>
               </div>
 
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                <div className="relative">
-                  <div className="w-4 h-4 sm:w-6 sm:h-6 bg-red-500 rounded-full border-2 sm:border-4 border-white shadow-lg animate-pulse"></div>
-                  <div className="absolute top-4 sm:top-6 left-1/2 transform -translate-x-1/2 w-1 h-4 sm:h-6 bg-red-500 rounded-full"></div>
-                </div>
-              </div>
-
               <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/80 text-white text-xs sm:text-sm px-3 py-2 rounded-full backdrop-blur-sm border border-white/20 transition-opacity duration-300">
                 {isRTL ? '👆 اضغط لفتح الخريطة' : '👆 Tap to open map'}
               </div>

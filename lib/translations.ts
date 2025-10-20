@@ -32,6 +32,7 @@ type TranslationKey =
   | 'yourName'
   | 'yourMessage'
   | 'clearDrawing'
+  | 'undo'
   | 'sendMessage'
   | 'messageSent'
   | 'messageError'
@@ -184,6 +185,10 @@ export const translations: Translations = {
   clearDrawing: {
     en: 'Clear',
     ar: 'مسح',
+  },
+  undo: {
+    en: 'Undo',
+    ar: 'تراجع',
   },
   sendMessage: {
     en: 'Send Message',

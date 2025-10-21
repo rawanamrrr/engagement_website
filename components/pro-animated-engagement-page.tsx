@@ -153,12 +153,22 @@ export default function ProAnimatedEngagementPage({ onImageLoad, playGifTrigger 
 
   // When intro finishes (skipped or completed), show the GIF once and set timer
   useEffect(() => {
-    if (playGifTrigger && !gifHasPlayed) {
+    if (playGifTrigger) {
       console.log('🎬 Playing GIF - playGifTrigger:', playGifTrigger, 'gifHasPlayed:', gifHasPlayed);
+      
+      // Reset GIF state to restart from beginning
+      setGifHasPlayed(false);
       
       // Clear any existing timer
       if (gifTimerRef.current) {
         clearTimeout(gifTimerRef.current);
+      }
+      
+      // Force GIF to restart by resetting the src
+      if (gifRef.current) {
+        const currentSrc = gifRef.current.src;
+        gifRef.current.src = '';
+        gifRef.current.src = currentSrc;
       }
       
       // Set timer to end GIF after duration
@@ -170,7 +180,7 @@ export default function ProAnimatedEngagementPage({ onImageLoad, playGifTrigger 
         gifTimerRef.current = null;
       }, duration);
     }
-  }, [playGifTrigger, gifHasPlayed]);
+  }, [playGifTrigger]);
 
   const handleImageLoad = () => {
     setImageLoaded(true)

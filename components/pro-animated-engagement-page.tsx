@@ -65,22 +65,108 @@ const scaleIn: Variants = {
   }
 }
 
-// Alternating entrance variants
+// Professional flying entrance variants
 const slideFromLeft: Variants = {
-  hidden: { x: -60, opacity: 0 },
+  hidden: { x: -120, opacity: 0, scale: 0.9 },
   visible: {
     x: 0,
     opacity: 1,
-    transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] as const }
+    scale: 1,
+    transition: { 
+      duration: 1.2, 
+      ease: [0.16, 1, 0.3, 1] as const,
+      type: "spring",
+      stiffness: 80,
+      damping: 20
+    }
   }
 }
 
 const slideFromRight: Variants = {
-  hidden: { x: 60, opacity: 0 },
+  hidden: { x: 120, opacity: 0, scale: 0.9 },
   visible: {
     x: 0,
     opacity: 1,
-    transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] as const }
+    scale: 1,
+    transition: { 
+      duration: 1.2, 
+      ease: [0.16, 1, 0.3, 1] as const,
+      type: "spring",
+      stiffness: 80,
+      damping: 20
+    }
+  }
+}
+
+// Dramatic fly-in from far left
+const flyFromLeft: Variants = {
+  hidden: { x: -200, opacity: 0, scale: 0.8, rotate: -5 },
+  visible: {
+    x: 0,
+    opacity: 1,
+    scale: 1,
+    rotate: 0,
+    transition: { 
+      duration: 1.4, 
+      ease: [0.16, 1, 0.3, 1] as const,
+      type: "spring",
+      stiffness: 60,
+      damping: 18
+    }
+  }
+}
+
+// Dramatic fly-in from far right
+const flyFromRight: Variants = {
+  hidden: { x: 200, opacity: 0, scale: 0.8, rotate: 5 },
+  visible: {
+    x: 0,
+    opacity: 1,
+    scale: 1,
+    rotate: 0,
+    transition: { 
+      duration: 1.4, 
+      ease: [0.16, 1, 0.3, 1] as const,
+      type: "spring",
+      stiffness: 60,
+      damping: 18
+    }
+  }
+}
+
+// Floating entrance from left with bounce
+const floatFromLeft: Variants = {
+  hidden: { x: -150, y: -30, opacity: 0, scale: 0.7 },
+  visible: {
+    x: 0,
+    y: 0,
+    opacity: 1,
+    scale: 1,
+    transition: { 
+      duration: 1.5, 
+      ease: [0.16, 1, 0.3, 1] as const,
+      type: "spring",
+      stiffness: 70,
+      damping: 15
+    }
+  }
+}
+
+// Floating entrance from right with bounce
+const floatFromRight: Variants = {
+  hidden: { x: 150, y: -30, opacity: 0, scale: 0.7 },
+  visible: {
+    x: 0,
+    y: 0,
+    opacity: 1,
+    scale: 1,
+    transition: { 
+      duration: 1.5, 
+      ease: [0.16, 1, 0.3, 1] as const,
+      type: "spring",
+      stiffness: 70,
+      damping: 15
+    }
   }
 }
 
@@ -88,7 +174,15 @@ const staggerContainer: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.25, delayChildren: 0.15 }
+    transition: { staggerChildren: 0.2, delayChildren: 0.1 }
+  }
+}
+
+const fastStaggerContainer: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.15, delayChildren: 0.05 }
   }
 }
 
@@ -211,11 +305,11 @@ export default function ProAnimatedEngagementPage({ onImageLoad, playGifTrigger 
         className="relative"
         initial="hidden"
         animate="visible"
-        variants={staggerContainer}
+        variants={fastStaggerContainer}
       >
         <motion.div 
           className="w-full relative z-10"
-          variants={slideUp}
+          variants={scaleIn}
         >
           {/* Optimized Image with immediate loading */}
           <div className="relative w-full h-auto">
@@ -267,13 +361,13 @@ export default function ProAnimatedEngagementPage({ onImageLoad, playGifTrigger 
           </div>
         </motion.div>
         
-        {/* Scroll Down Indicator */}
+        {/* Scroll Down Indicator - Flying from left */}
         <motion.div
           className="absolute bottom-12 left-8 flex flex-col items-center gap-3 z-20"
           initial="hidden"
           animate="visible"
-          variants={slideFromLeft}
-          transition={{ delay: 1, duration: 0.8 }}
+          variants={flyFromLeft}
+          transition={{ delay: 0.8 }}
         >
           <div className="bg-background/80 backdrop-blur-sm px-6 py-3 rounded-full shadow-lg border border-accent/30">
             <span className="text-base md:text-lg text-foreground font-medium tracking-wide">
@@ -305,13 +399,19 @@ export default function ProAnimatedEngagementPage({ onImageLoad, playGifTrigger 
           </motion.div>
         </motion.div>
         
-        {/* Subtle parallax background elements */}
+        {/* Animated floating background elements */}
         <motion.div 
           className="absolute -left-20 top-1/4 w-64 h-64 bg-accent/5 rounded-full mix-blend-multiply filter blur-3xl"
+          initial={{ x: -200, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{ duration: 2, ease: "easeOut", delay: 0.5 }}
           style={{ y: pathY1 }}
         />
         <motion.div 
           className="absolute -right-20 bottom-1/4 w-72 h-72 bg-accent/5 rounded-full mix-blend-multiply filter blur-3xl"
+          initial={{ x: 200, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{ duration: 2, ease: "easeOut", delay: 0.7 }}
           style={{ y: pathY2 }}
         />
       </motion.section>
@@ -322,28 +422,60 @@ export default function ProAnimatedEngagementPage({ onImageLoad, playGifTrigger 
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: "-100px" }}
-        variants={staggerContainer}
+        variants={fastStaggerContainer}
       >
-        {/* Decorative Elements */}
-        <div className="absolute top-0 left-0 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
+        {/* Animated Decorative Elements */}
+        <motion.div 
+          className="absolute top-0 left-0 w-96 h-96 bg-accent/5 rounded-full blur-3xl"
+          initial={{ x: -300, opacity: 0, scale: 0.5 }}
+          whileInView={{ x: 0, opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1.8, ease: "easeOut" }}
+        />
+        <motion.div 
+          className="absolute bottom-0 right-0 w-96 h-96 bg-accent/5 rounded-full blur-3xl"
+          initial={{ x: 300, opacity: 0, scale: 0.5 }}
+          whileInView={{ x: 0, opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1.8, ease: "easeOut", delay: 0.2 }}
+        />
         
         <div className="relative max-w-6xl mx-auto text-center">
           <motion.div 
             className="inline-flex flex-col items-center mb-16"
-            variants={staggerContainer}
+            variants={fastStaggerContainer}
           >
-            <motion.div className="flex items-center gap-4 mb-8" variants={slideFromLeft}>
-              <div className="w-24 h-px bg-gradient-to-r from-transparent via-accent to-transparent" />
-              <svg className="w-6 h-6 text-accent" fill="currentColor" viewBox="0 0 24 24">
+            <motion.div className="flex items-center gap-4 mb-8" variants={flyFromLeft}>
+              <motion.div 
+                className="w-24 h-px bg-gradient-to-r from-transparent via-accent to-transparent"
+                initial={{ scaleX: 0 }}
+                whileInView={{ scaleX: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 1, delay: 0.3 }}
+              />
+              <motion.svg 
+                className="w-6 h-6 text-accent" 
+                fill="currentColor" 
+                viewBox="0 0 24 24"
+                initial={{ scale: 0, rotate: -180 }}
+                whileInView={{ scale: 1, rotate: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8, delay: 0.5, type: "spring" }}
+              >
                 <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-              </svg>
-              <div className="w-24 h-px bg-gradient-to-r from-transparent via-accent to-transparent" />
+              </motion.svg>
+              <motion.div 
+                className="w-24 h-px bg-gradient-to-r from-transparent via-accent to-transparent"
+                initial={{ scaleX: 0 }}
+                whileInView={{ scaleX: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 1, delay: 0.3 }}
+              />
             </motion.div>
-            <motion.h2 className="font-luxury text-5xl md:text-6xl lg:text-7xl text-foreground leading-tight mb-6 tracking-wide" variants={slideFromRight}>
+            <motion.h2 className="font-luxury text-5xl md:text-6xl lg:text-7xl text-foreground leading-tight mb-6 tracking-wide" variants={flyFromRight}>
               {t('ourSpecialDay')}
             </motion.h2>
-            <motion.p className="font-luxury text-xl md:text-2xl text-muted-foreground font-light max-w-3xl italic" variants={slideUp}>
+            <motion.p className="font-luxury text-xl md:text-2xl text-muted-foreground font-light max-w-3xl italic" variants={scaleIn}>
               {t('countingMoments')}
             </motion.p>
           </motion.div>
@@ -360,31 +492,67 @@ export default function ProAnimatedEngagementPage({ onImageLoad, playGifTrigger 
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: "-100px" }}
-        variants={staggerContainer}
+        variants={fastStaggerContainer}
       >
         <div className="max-w-6xl mx-auto">
           <motion.div 
             className="text-center mb-20"
-            variants={staggerContainer}
+            variants={fastStaggerContainer}
           >
-            <motion.div className="flex items-center justify-center gap-4 mb-8" variants={slideFromLeft}>
-              <div className="w-32 h-px bg-gradient-to-r from-transparent via-accent to-transparent" />
-              <div className="w-3 h-3 rotate-45 bg-accent" />
-              <div className="w-32 h-px bg-gradient-to-r from-transparent via-accent to-transparent" />
+            <motion.div className="flex items-center justify-center gap-4 mb-8" variants={floatFromLeft}>
+              <motion.div 
+                className="w-32 h-px bg-gradient-to-r from-transparent via-accent to-transparent"
+                initial={{ scaleX: 0, originX: 1 }}
+                whileInView={{ scaleX: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 1.2, delay: 0.2 }}
+              />
+              <motion.div 
+                className="w-3 h-3 rotate-45 bg-accent"
+                initial={{ scale: 0, rotate: -180 }}
+                whileInView={{ scale: 1, rotate: 45 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8, delay: 0.4, type: "spring" }}
+              />
+              <motion.div 
+                className="w-32 h-px bg-gradient-to-r from-transparent via-accent to-transparent"
+                initial={{ scaleX: 0, originX: 0 }}
+                whileInView={{ scaleX: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 1.2, delay: 0.2 }}
+              />
             </motion.div>
-            <motion.h2 className="font-luxury text-5xl md:text-6xl lg:text-7xl text-foreground leading-tight mb-4 tracking-wide" variants={slideFromRight}>
+            <motion.h2 className="font-luxury text-5xl md:text-6xl lg:text-7xl text-foreground leading-tight mb-4 tracking-wide" variants={floatFromRight}>
               {t('joinUsAt')}
             </motion.h2>
           </motion.div>
 
           <motion.div 
             className="max-w-3xl mx-auto space-y-8"
-            variants={staggerContainer}
+            variants={scaleIn}
           >
-            <div className="relative bg-gradient-to-br from-card via-card/95 to-card/90 backdrop-blur-md border-2 border-accent/20 rounded-3xl p-10 md:p-14 shadow-2xl overflow-hidden">
-              {/* Decorative corner elements */}
-              <div className="absolute top-0 left-0 w-32 h-32 border-l-2 border-t-2 border-accent/30 rounded-tl-3xl" />
-              <div className="absolute bottom-0 right-0 w-32 h-32 border-r-2 border-b-2 border-accent/30 rounded-br-3xl" />
+            <motion.div 
+              className="relative bg-gradient-to-br from-card via-card/95 to-card/90 backdrop-blur-md border-2 border-accent/20 rounded-3xl p-10 md:p-14 shadow-2xl overflow-hidden"
+              initial={{ scale: 0.9, opacity: 0, y: 50 }}
+              whileInView={{ scale: 1, opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+            >
+              {/* Animated Decorative corner elements */}
+              <motion.div 
+                className="absolute top-0 left-0 w-32 h-32 border-l-2 border-t-2 border-accent/30 rounded-tl-3xl"
+                initial={{ x: -50, y: -50, opacity: 0 }}
+                whileInView={{ x: 0, y: 0, opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 1, delay: 0.3 }}
+              />
+              <motion.div 
+                className="absolute bottom-0 right-0 w-32 h-32 border-r-2 border-b-2 border-accent/30 rounded-br-3xl"
+                initial={{ x: 50, y: 50, opacity: 0 }}
+                whileInView={{ x: 0, y: 0, opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 1, delay: 0.3 }}
+              />
               
               <div className="relative z-10">
                 <div className="flex justify-center mb-6">
@@ -402,31 +570,55 @@ export default function ProAnimatedEngagementPage({ onImageLoad, playGifTrigger 
                 <div className="flex flex-col md:flex-row items-center justify-center gap-8 pt-10 pb-10 border-t-2 border-b-2 border-accent/20">
                   <motion.div 
                     className="flex items-center gap-4 bg-accent/10 px-6 py-3 rounded-full"
-                    initial="hidden" whileInView="visible" viewport={{ once: true }} variants={slideFromLeft}
+                    initial="hidden" whileInView="visible" viewport={{ once: true }} variants={flyFromLeft}
                   >
-                    <svg className="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <motion.svg 
+                      className="w-6 h-6 text-accent" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                      initial={{ rotate: -180, scale: 0 }}
+                      whileInView={{ rotate: 0, scale: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.8, delay: 0.3, type: "spring" }}
+                    >
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth={2}
                         d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                       />
-                    </svg>
+                    </motion.svg>
                     <span className="font-luxury text-lg text-foreground font-medium">{formattedDate}</span>
                   </motion.div>
-                  <div className="hidden md:block w-px h-10 bg-accent/30" />
+                  <motion.div 
+                    className="hidden md:block w-px h-10 bg-accent/30"
+                    initial={{ scaleY: 0 }}
+                    whileInView={{ scaleY: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: 0.5 }}
+                  />
                   <motion.div 
                     className="flex items-center gap-4 bg-accent/10 px-6 py-3 rounded-full"
-                    initial="hidden" whileInView="visible" viewport={{ once: true }} variants={slideFromRight}
+                    initial="hidden" whileInView="visible" viewport={{ once: true }} variants={flyFromRight}
                   >
-                    <svg className="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <motion.svg 
+                      className="w-6 h-6 text-accent" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                      initial={{ rotate: 180, scale: 0 }}
+                      whileInView={{ rotate: 0, scale: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.8, delay: 0.3, type: "spring" }}
+                    >
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth={2}
                         d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                       />
-                    </svg>
+                    </motion.svg>
                     <span className="font-luxury text-lg text-foreground font-medium">{formattedTime}</span>
                   </motion.div>
                 </div>
@@ -434,12 +626,15 @@ export default function ProAnimatedEngagementPage({ onImageLoad, playGifTrigger 
                 {/* Map integrated inside the card */}
                 <motion.div
                   className="mt-10"
-                  initial="hidden" whileInView="visible" viewport={{ once: true }} variants={scaleIn}
+                  initial={{ scale: 0.9, opacity: 0, y: 30 }}
+                  whileInView={{ scale: 1, opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 1, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
                 >
                   <VenueMap />
                 </motion.div>
               </div>
-            </div>
+            </motion.div>
           </motion.div>
           
         </div>

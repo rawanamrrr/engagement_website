@@ -10,6 +10,7 @@ import { Variants } from "framer-motion"
 import { useTranslation } from "@/lib/translations"
 import { useLanguage } from "@/contexts/LanguageContext"
 import { Button } from "@/components/ui/button"
+import PhotoUploadSection from "@/components/photo-upload-section"
 
 // Format date in Arabic or English
 const formatDate = (date: Date, locale: string) => {
@@ -642,6 +643,9 @@ export default function ProAnimatedEngagementPage({ onImageLoad, playGifTrigger 
 
       {/* Message Section */}
       <HandwrittenMessage />
+
+      {/* Photo Upload Section */}
+      <PhotoUploadSection />
       
       {/* Footer */}
       <motion.footer 

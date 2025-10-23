@@ -52,7 +52,12 @@ type TranslationKey =
   | 'widthBold'
   | 'current'
   | 'size'
-  | 'copyright';
+  | 'copyright'
+  | 'sharePhotosTitle'
+  | 'sharePhotosDescription'
+  | 'uploadButton'
+  | 'scanQRCode'
+  | 'orUploadDirectly';
 
 type Translations = {
   [key in TranslationKey]: {
@@ -269,6 +274,26 @@ export const translations: Translations = {
   copyright: {
     en: 'All Rights Reserved. Made by',
     ar: 'جميع الحقوق محفوظة. صنع بواسطة',
+  },
+  sharePhotosTitle: {
+    en: 'Share Your Photos From The Day',
+    ar: 'شاركونا صوركم من اليوم',
+  },
+  sharePhotosDescription: {
+    en: 'Upload the photos you take during our celebration so we can cherish these memories together',
+    ar: 'ارفعوا الصور التي التقطوها خلال احتفالنا لنحتفظ بهذه الذكريات معاً',
+  },
+  uploadButton: {
+    en: 'Upload Your Photos',
+    ar: 'ارفع صورك',
+  },
+  scanQRCode: {
+    en: 'Scan QR Code to Upload Your Photos',
+    ar: 'امسح الرمز لرفع صورك',
+  },
+  orUploadDirectly: {
+    en: 'Or click below to upload your photos directly',
+    ar: 'أو اضغط أدناه لرفع صورك مباشرة',
   },
 };
 

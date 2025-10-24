@@ -25,6 +25,8 @@ export const metadata: Metadata = {
   openGraph: {
     title: "💍",
     description: "",
+    url: "https://zeyadandrawan.netlify.app",
+    siteName: "💍",
     images: [
       {
         url: "/invitation-design.png",
@@ -34,6 +36,7 @@ export const metadata: Metadata = {
       },
     ],
     type: "website",
+    locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",

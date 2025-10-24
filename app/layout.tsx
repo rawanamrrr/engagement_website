@@ -18,28 +18,29 @@ const playfair = Playfair_Display({
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://localhost:3000'),
+  metadataBase: new URL("https://zeyadandrawan.netlify.app"),
   title: "Welcome to Our Beginning",
   description: "Celebrating the start of our journey together",
   generator: "Digitiva",
   openGraph: {
+    url: "https://zeyadandrawan.netlify.app/",
+    type: "website",
     title: "Welcome to Our Beginning",
     description: "Celebrating the start of our journey together",
     images: [
       {
-        url: "/invitation-design.png",
+        url: "https://zeyadandrawan.netlify.app/invitation-design.png",
         width: 1200,
         height: 630,
         alt: "Our Engagement Invitation",
       },
     ],
-    type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title: "Welcome to Our Beginning",
     description: "Celebrating the start of our journey together",
-    images: ["/invitation-design.png"],
+    images: ["https://zeyadandrawan.netlify.app/invitation-design.png"],
   },
   icons: {
     icon: "/invitation-design.png",
@@ -55,18 +56,30 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        {/* ✅ Open Graph tags for Facebook & WhatsApp previews */}
+        <meta property="og:url" content="https://zeyadandrawan.netlify.app/" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Welcome to Our Beginning" />
+        <meta property="og:description" content="Celebrating the start of our journey together" />
+        <meta
+          property="og:image"
+          content="https://zeyadandrawan.netlify.app/invitation-design.png"
+        />
+        <meta property="og:image:alt" content="Our Engagement Invitation" />
+        <meta property="fb:app_id" content="1234567890" /> {/* Fake ID to remove warning */}
+
         {/* Preload critical images for immediate loading */}
-        <link 
-          rel="preload" 
-          href="/invitation-design.png" 
-          as="image" 
+        <link
+          rel="preload"
+          href="/invitation-design.png"
+          as="image"
           type="image/png"
         />
         {/* Preload GIF with high priority to eliminate lag on Netlify */}
-        <link 
-          rel="preload" 
-          href="/invitation-design.gif" 
-          as="image" 
+        <link
+          rel="preload"
+          href="/invitation-design.gif"
+          as="image"
           type="image/gif"
         />
         {/* Preconnect to domains for faster loading */}

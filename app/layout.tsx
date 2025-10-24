@@ -21,6 +21,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://zeyadandrawan.netlify.app"),
   title: "Welcome to Our Beginning",
   description: "Celebrating the start of our journey together",
+  generator: "Digitiva",
   openGraph: {
     url: "https://zeyadandrawan.netlify.app/",
     type: "website",
@@ -49,21 +50,42 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{ children: React.ReactNode }>) {
+}: Readonly<{
+  children: React.ReactNode
+}>) {
   return (
-    <html lang="en" prefix="og: https://ogp.me/ns#">
+    <html lang="en">
       <head>
-        {/* ✅ fb:app_id must be manually added (Next.js doesn't include it in metadata) */}
-        <meta property="fb:app_id" content="1234567890" />
-
-        {/* ✅ Ensure og:url explicitly exists in the HTML (in case Next skips it) */}
+        {/* ✅ Open Graph tags for Facebook & WhatsApp previews */}
         <meta property="og:url" content="https://zeyadandrawan.netlify.app/" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Welcome to Our Beginning" />
+        <meta property="og:description" content="Celebrating the start of our journey together" />
+        <meta
+          property="og:image"
+          content="https://zeyadandrawan.netlify.app/invitation-design.png"
+        />
+        <meta property="og:image:alt" content="Our Engagement Invitation" />
+        <meta property="fb:app_id" content="1234567890" /> {/* Fake ID to remove warning */}
 
-        {/* Preload critical assets */}
-        <link rel="preload" href="/invitation-design.png" as="image" type="image/png" />
-        <link rel="preload" href="/invitation-design.gif" as="image" type="image/gif" />
+        {/* Preload critical images for immediate loading */}
+        <link
+          rel="preload"
+          href="/invitation-design.png"
+          as="image"
+          type="image/png"
+        />
+        {/* Preload GIF with high priority to eliminate lag on Netlify */}
+        <link
+          rel="preload"
+          href="/invitation-design.gif"
+          as="image"
+          type="image/gif"
+        />
+        {/* Preconnect to domains for faster loading */}
         <link rel="preconnect" href="https://maps.googleapis.com" />
         <link rel="preconnect" href="https://maps.gstatic.com" />
+        {/* Preload Google Fonts */}
         <link
           rel="preload"
           href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap"

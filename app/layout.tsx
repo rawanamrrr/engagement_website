@@ -18,27 +18,29 @@ const playfair = Playfair_Display({
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://localhost:3000'),
-  title: "Welcome to Our Beginning",
-  description: "Celebrating the start of our journey together",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://zeyadandrawan.netlify.app'),
+  title: "Zeyad & Rawan - Save the Date",
+  description: "You are invited to the engagement of Zeyad & Rawan | Friday, November 7, 2025 at 07:00 PM | Diva Garden Hall, Talkha City | Join us as we begin our journey of love and togetherness",
   generator: "Digitiva",
   openGraph: {
-    title: "Welcome to Our Beginning",
-    description: "Celebrating the start of our journey together",
+    title: "Zeyad & Rawan - Save the Date",
+    description: "You are invited to the engagement of Zeyad & Rawan | Friday, November 7, 2025 at 07:00 PM | Diva Garden Hall, Talkha City",
     images: [
       {
         url: "/invitation-design.png",
-        width: 1200,
-        height: 630,
-        alt: "Our Engagement Invitation",
+        width: 768,
+        height: 1365,
+        alt: "Zeyad & Rawan Engagement Invitation - Save the Date",
       },
     ],
     type: "website",
+    siteName: "Zeyad & Rawan Engagement",
+    locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Welcome to Our Beginning",
-    description: "Celebrating the start of our journey together",
+    title: "Zeyad & Rawan - Save the Date",
+    description: "You are invited to the engagement of Zeyad & Rawan | Friday, November 7, 2025 at 07:00 PM | Diva Garden Hall, Talkha City",
     images: ["/invitation-design.png"],
   },
   icons: {

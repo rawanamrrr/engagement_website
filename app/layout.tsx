@@ -68,7 +68,7 @@ export default function RootLayout({
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta property="og:image:alt" content="Our Engagement Invitation" />
-        <meta property="fb:app_id" content="1234567890" /> {/* Fake ID to remove warning */}
+        {/* Removed invalid fb:app_id since it's not needed for basic sharing */}
 
         {/* Twitter Card tags */}
         <meta name="twitter:card" content="summary_large_image" />

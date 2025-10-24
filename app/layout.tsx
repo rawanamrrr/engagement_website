@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     description: "Celebrating the start of our journey together",
     images: [
       {
-        url: "https://zeyadandrawan.site/invitation-design-arabic.png",
+        url: "https://zeyadandrawan.site/invitation-design-arabic.jpg",
         width: 1200,
         height: 630,
         alt: "Our Engagement Invitation",
@@ -40,11 +40,11 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Welcome to Our Beginning",
     description: "Celebrating the start of our journey together",
-    images: ["https://zeyadandrawan.site/invitation-design-arabic.png"],
+    images: ["https://zeyadandrawan.site/invitation-design-arabic.jpg"],
   },
   icons: {
-    icon: "/invitation-design-arabic.png",
-    apple: "/invitation-design-arabic.png",
+    icon: "/invitation-design-arabic.jpg",
+    apple: "/invitation-design-arabic.jpg",
   },
 }
 
@@ -63,7 +63,7 @@ export default function RootLayout({
         <meta property="og:description" content="Celebrating the start of our journey together" />
         <meta
           property="og:image"
-          content="https://zeyadandrawan.site/invitation-design-arabic.png"
+          content="https://zeyadandrawan.site/invitation-design-arabic.jpg"
         />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
@@ -74,14 +74,14 @@ export default function RootLayout({
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Welcome to Our Beginning" />
         <meta name="twitter:description" content="Celebrating the start of our journey together" />
-        <meta name="twitter:image" content="https://zeyadandrawan.site/invitation-design-arabic.png" />
+        <meta name="twitter:image" content="https://zeyadandrawan.site/invitation-design-arabic.jpg" />
 
         {/* Preload critical images for immediate loading */}
         <link
           rel="preload"
-          href="/invitation-design-arabic.png"
+          href="/invitation-design-arabic.jpg"
           as="image"
-          type="image/png"
+          type="image/jpg"
         />
         {/* Preload GIF with high priority to eliminate lag on Netlify */}
         <link

@@ -19,14 +19,12 @@ const playfair = Playfair_Display({
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://localhost:3000'),
-  title: "💍",
-  description: "",
+  title: "Welcome to Our Beginning",
+  description: "Celebrating the start of our journey together",
   generator: "Digitiva",
   openGraph: {
-    title: "💍",
-    description: "",
-    url: "https://zeyadandrawan.netlify.app",
-    siteName: "💍",
+    title: "Welcome to Our Beginning",
+    description: "Celebrating the start of our journey together",
     images: [
       {
         url: "/invitation-design.png",
@@ -36,12 +34,11 @@ export const metadata: Metadata = {
       },
     ],
     type: "website",
-    locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: "💍",
-    description: "",
+    title: "Welcome to Our Beginning",
+    description: "Celebrating the start of our journey together",
     images: ["/invitation-design.png"],
   },
   icons: {

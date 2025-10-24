@@ -18,6 +18,7 @@ const playfair = Playfair_Display({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://localhost:3000'),
   title: "Welcome to Our Beginning",
   description: "Celebrating the start of our journey together",
   generator: "Digitiva",

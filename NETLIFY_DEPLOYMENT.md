@@ -6,9 +6,10 @@ To deploy this engagement website to Netlify, you need to configure the followin
 
 ### Required Environment Variables
 
-1. **SMTP_USER** - Your Gmail address (e.g., `engagementzeyadrawan@gmail.com`)
-2. **SMTP_PASS** - Your Gmail App Password (16-character password)
-3. **CONTACT_EMAIL** - Email address to receive messages (can be the same as SMTP_USER)
+1. **NEXT_PUBLIC_SITE_URL** - Your deployed website URL (e.g., `https://zeyadandrawan.netlify.app`)
+2. **SMTP_USER** - Your Gmail address (e.g., `engagementzeyadrawan@gmail.com`)
+3. **SMTP_PASS** - Your Gmail App Password (16-character password)
+4. **CONTACT_EMAIL** - Email address to receive messages (can be the same as SMTP_USER)
 
 ### Steps to Configure in Netlify
 
@@ -17,6 +18,9 @@ To deploy this engagement website to Netlify, you need to configure the followin
 3. Click **Add a variable** and add each of the following:
 
    ```
+   Key: NEXT_PUBLIC_SITE_URL
+   Value: https://zeyadandrawan.netlify.app
+   
    Key: SMTP_USER
    Value: your-email@gmail.com
    

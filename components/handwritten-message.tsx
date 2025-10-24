@@ -120,6 +120,11 @@ export default function HandwrittenMessage() {
   const rafId = useRef<number | null>(null);
   const lastWidth = useRef(currentWidth);
   const hasDrawn = useRef(false);
+  const hasSavedInitialState = useRef(false);
+  const canvasStateBeforeDrawing = useRef<ImageData | null>(null);
+  const isProcessingStop = useRef(false);
+  const hasSavedToHistory = useRef(false);
+  const lastTouchTime = useRef(0);
 
   const getPressure = (e: Touch | MouseEvent | React.Touch | React.MouseEvent): number => {
     // Check if the device supports pressure (like iPad with Apple Pencil)
@@ -131,7 +136,7 @@ export default function HandwrittenMessage() {
   };
 
   const drawSmoothLine = () => {
-    if (!canvasRef.current || points.current.length < 2) return;
+    if (!canvasRef.current || points.current.length < 3) return;
     
     const ctx = canvasRef.current.getContext('2d');
     if (!ctx) return;
@@ -222,21 +227,45 @@ export default function HandwrittenMessage() {
 };
 
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+    // Prevent mouse events if touch event just fired (mobile browsers fire both)
+    if ('touches' in e) {
+      lastTouchTime.current = Date.now();
+    } else {
+      // If this is a mouse event within 500ms of a touch event, ignore it
+      if (Date.now() - lastTouchTime.current < 500) {
+        return;
+      }
+    }
+    
     e.preventDefault();
     if (!canvasRef.current) return;
     
     const coords = getCanvasCoordinates('touches' in e ? e.touches[0] : e.nativeEvent);
     if (!coords) return;
     
+    // Save the current canvas state before we start drawing
+    const ctx = canvasRef.current.getContext('2d');
+    if (ctx) {
+      canvasStateBeforeDrawing.current = ctx.getImageData(0, 0, canvasRef.current.width, canvasRef.current.height);
+    }
+    
     const pressure = getPressure('touches' in e ? e.touches[0] : e.nativeEvent);
     points.current = [{ x: coords.x, y: coords.y, pressure }];
     hasDrawn.current = false;
+    hasSavedInitialState.current = false;
+    isProcessingStop.current = false;
+    hasSavedToHistory.current = false;
     setIsDrawing(true);
     
     // Start the drawing loop
     const drawLoop = () => {
-      if (points.current.length > 1) {
+      // Only draw if we have at least 3 points (a real stroke, not just a tap)
+      if (points.current.length >= 3) {
         drawSmoothLine();
+        // Save initial state after first actual draw
+        if (!hasSavedInitialState.current && canvasRef.current) {
+          hasSavedInitialState.current = true;
+        }
         // Keep only the last few points to maintain performance
         if (points.current.length > 10) {
           points.current = points.current.slice(-10);
@@ -249,6 +278,15 @@ export default function HandwrittenMessage() {
   };
 
   const draw = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+    // Prevent mouse events if touch event just fired
+    if ('touches' in e) {
+      lastTouchTime.current = Date.now();
+    } else {
+      if (Date.now() - lastTouchTime.current < 500) {
+        return;
+      }
+    }
+    
     e.preventDefault();
     if (!isDrawing || !canvasRef.current) return;
     
@@ -262,21 +300,83 @@ export default function HandwrittenMessage() {
     hasDrawn.current = true;
   };
 
-  const stopDrawing = () => {
+  const stopDrawing = (e?: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+    // Prevent mouse events if touch event just fired
+    if (e) {
+      if ('touches' in e || 'changedTouches' in e) {
+        lastTouchTime.current = Date.now();
+      } else {
+        if (Date.now() - lastTouchTime.current < 500) {
+          return;
+        }
+      }
+    }
+    
+    // Guard against double execution
+    if (!isDrawing || isProcessingStop.current) return;
+    
+    // Mark that we're processing to prevent re-entry
+    isProcessingStop.current = true;
+    
+    // Set isDrawing to false to prevent any further operations
+    setIsDrawing(false);
+    
     if (rafId.current !== null) {
       cancelAnimationFrame(rafId.current);
       rafId.current = null;
     }
     
-    // Only save to history if actual drawing occurred (more than just a click)
-    if (hasDrawn.current && canvasRef.current) {
-      const dataUrl = canvasRef.current.toDataURL();
-      setHistory(prev => [...prev, dataUrl]);
+    if (!canvasRef.current || points.current.length === 0) {
+      points.current = [];
+      hasDrawn.current = false;
+      hasSavedInitialState.current = false;
+      canvasStateBeforeDrawing.current = null;
+      isProcessingStop.current = false;
+      return;
     }
     
+    const ctx = canvasRef.current.getContext('2d');
+    if (!ctx || !canvasStateBeforeDrawing.current) {
+      points.current = [];
+      hasDrawn.current = false;
+      hasSavedInitialState.current = false;
+      canvasStateBeforeDrawing.current = null;
+      isProcessingStop.current = false;
+      return;
+    }
+    
+    // Determine if this was a dot (tap) or a stroke (drag)
+    const isDot = points.current.length < 3;
+    
+    if (isDot) {
+      // It's a dot - restore canvas to clean state first
+      ctx.putImageData(canvasStateBeforeDrawing.current, 0, 0);
+      // Now draw a clean dot
+      const point = points.current[0];
+      ctx.beginPath();
+      ctx.arc(point.x, point.y, currentWidth / 2, 0, Math.PI * 2);
+      ctx.fillStyle = currentColor;
+      ctx.fill();
+    }
+    
+    // Save to history exactly once per drawing session
+    // Use requestAnimationFrame to ensure canvas is fully rendered
+    if (!hasSavedToHistory.current) {
+      hasSavedToHistory.current = true;
+      requestAnimationFrame(() => {
+        if (canvasRef.current) {
+          const dataUrl = canvasRef.current.toDataURL();
+          setHistory(prev => [...prev, dataUrl]);
+        }
+      });
+    }
+    
+    // Clean up
     points.current = [];
     hasDrawn.current = false;
-    setIsDrawing(false);
+    hasSavedInitialState.current = false;
+    canvasStateBeforeDrawing.current = null;
+    isProcessingStop.current = false;
   };
 
   // Clean up animation frame on unmount

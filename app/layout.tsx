@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     description: "You are invited to the engagement of Zeyad & Rawan | Friday, November 7, 2025 at 07:00 PM | Diva Garden Hall, Talkha City",
     images: [
       {
-        url: "/invitation-design.png",
+        url: "https://zeyadandrawan.netlify.app/invitation-design.png",
         width: 768,
         height: 1365,
         alt: "Zeyad & Rawan Engagement Invitation - Save the Date",
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Zeyad & Rawan - Save the Date",
     description: "You are invited to the engagement of Zeyad & Rawan | Friday, November 7, 2025 at 07:00 PM | Diva Garden Hall, Talkha City",
-    images: ["/invitation-design.png"],
+    images: ["https://zeyadandrawan.netlify.app/invitation-design.png"],
   },
   icons: {
     icon: "/invitation-design.png",

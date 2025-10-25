@@ -44,21 +44,38 @@ export function RomanticAudio() {
   useEffect(() => {
     if (!audioRef.current) return;
 
-    // Set initial volume and mute state
-    audioRef.current.volume = 0.25;
-    audioRef.current.muted = isMuted;
+    const audio = audioRef.current;
 
-    // Try to play automatically (works on some browsers)
-    const playPromise = audioRef.current.play();
-    if (playPromise !== undefined) {
-      playPromise
-        .then(() => setIsPlaying(true))
-        .catch(() => console.log('Autoplay prevented'));
+    // Set initial volume and mute state
+    audio.volume = 0.25;
+    audio.muted = isMuted;
+
+    // Wait for audio to be ready before attempting to play
+    const handleCanPlay = () => {
+      // Try to play automatically (works on some browsers)
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            setIsPlaying(true);
+            wasPlayingRef.current = true;
+          })
+          .catch(() => console.log('Autoplay prevented'));
+      }
+    };
+
+    // Add event listener for when audio is ready
+    audio.addEventListener('canplay', handleCanPlay, { once: true });
+
+    // If audio is already ready, trigger immediately
+    if (audio.readyState >= 3) {
+      handleCanPlay();
     }
 
     return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
+      audio.removeEventListener('canplay', handleCanPlay);
+      if (audio && !audio.paused) {
+        audio.pause();
       }
     };
   }, []);
@@ -71,57 +88,94 @@ export function RomanticAudio() {
 
   // Pause music when user leaves the browser/tab
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined' || typeof document === 'undefined') return;
 
     const handleVisibilityChange = () => {
       if (!audioRef.current) return;
 
-      if (document.hidden) {
-        // User left the tab/browser - save playing state and pause
-        wasPlayingRef.current = !audioRef.current.paused && !isMuted;
-        if (wasPlayingRef.current) {
-          audioRef.current.pause();
-          setIsPlaying(false);
+      try {
+        if (document.hidden) {
+          // User left the tab/browser - save playing state and pause
+          const isCurrentlyPlaying = !audioRef.current.paused && !isMuted;
+          wasPlayingRef.current = isCurrentlyPlaying;
+          
+          if (isCurrentlyPlaying) {
+            audioRef.current.pause();
+            setIsPlaying(false);
+          }
+        } else {
+          // User returned to the tab - resume only if it was playing before
+          if (wasPlayingRef.current && !isMuted && audioRef.current.paused) {
+            const playPromise = audioRef.current.play();
+            if (playPromise !== undefined) {
+              playPromise
+                .then(() => setIsPlaying(true))
+                .catch((err) => {
+                  console.log('Failed to resume audio:', err);
+                  wasPlayingRef.current = false;
+                });
+            }
+          }
         }
-      } else {
-        // User returned to the tab - resume only if it was playing before
-        if (wasPlayingRef.current && !isMuted) {
-          audioRef.current.play().catch((err) => {
-            console.log('Failed to resume audio:', err);
-          });
-          setIsPlaying(true);
-        }
+      } catch (error) {
+        console.error('Error in visibility change handler:', error);
       }
     };
 
     // Also handle blur/focus events as backup
     const handleBlur = () => {
       if (!audioRef.current) return;
-      wasPlayingRef.current = !audioRef.current.paused && !isMuted;
-      if (wasPlayingRef.current) {
-        audioRef.current.pause();
-        setIsPlaying(false);
+      
+      try {
+        const isCurrentlyPlaying = !audioRef.current.paused && !isMuted;
+        wasPlayingRef.current = isCurrentlyPlaying;
+        
+        if (isCurrentlyPlaying) {
+          audioRef.current.pause();
+          setIsPlaying(false);
+        }
+      } catch (error) {
+        console.error('Error in blur handler:', error);
       }
     };
 
     const handleFocus = () => {
       if (!audioRef.current) return;
-      if (wasPlayingRef.current && !isMuted) {
-        audioRef.current.play().catch((err) => {
-          console.log('Failed to resume audio:', err);
-        });
-        setIsPlaying(true);
+      
+      try {
+        if (wasPlayingRef.current && !isMuted && audioRef.current.paused) {
+          const playPromise = audioRef.current.play();
+          if (playPromise !== undefined) {
+            playPromise
+              .then(() => setIsPlaying(true))
+              .catch((err) => {
+                console.log('Failed to resume audio:', err);
+                wasPlayingRef.current = false;
+              });
+          }
+        }
+      } catch (error) {
+        console.error('Error in focus handler:', error);
       }
     };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('blur', handleBlur);
-    window.addEventListener('focus', handleFocus);
+    // Add event listeners with proper error handling
+    try {
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+      window.addEventListener('blur', handleBlur);
+      window.addEventListener('focus', handleFocus);
+    } catch (error) {
+      console.error('Error adding event listeners:', error);
+    }
 
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('blur', handleBlur);
-      window.removeEventListener('focus', handleFocus);
+      try {
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+        window.removeEventListener('blur', handleBlur);
+        window.removeEventListener('focus', handleFocus);
+      } catch (error) {
+        console.error('Error removing event listeners:', error);
+      }
     };
   }, [isMuted]);
 

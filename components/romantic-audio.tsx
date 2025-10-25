@@ -20,8 +20,9 @@ export function RomanticAudio() {
       if (audioRef.current && !isPlaying) {
         try {
           // Restore src if it was cleared on background
-          if (!audioRef.current.src) {
-            audioRef.current.src = '/romantic-piano.mp3';
+          const hasSrc = !!audioRef.current.getAttribute('src');
+          if (!hasSrc) {
+            audioRef.current.setAttribute('src', '/romantic-piano.mp3');
             audioRef.current.load();
           }
           audioRef.current.muted = false;
@@ -70,8 +71,8 @@ export function RomanticAudio() {
     };
 
     // Ensure src is present
-    if (!audio.src) {
-      audio.src = '/romantic-piano.mp3';
+    if (!audio.getAttribute('src')) {
+      audio.setAttribute('src', '/romantic-piano.mp3');
     }
 
     // Add event listener for when audio is ready
@@ -108,6 +109,7 @@ export function RomanticAudio() {
         a.muted = true;
         a.pause();
         try { a.currentTime = 0; } catch {}
+        try { a.removeAttribute('src'); } catch {}
         try { a.load(); } catch {}
         wasPlayingRef.current = false;
         setIsPlaying(false);
@@ -118,8 +120,13 @@ export function RomanticAudio() {
       }
     };
 
+    const isDocumentHidden = () => {
+      const d = document as any;
+      return d.hidden === true || d.visibilityState === 'hidden' || d.webkitHidden === true;
+    };
+
     const handleVisibilityChange = () => {
-      if (document.hidden) {
+      if (isDocumentHidden()) {
         pauseIfPlaying();
       }
     };
@@ -145,7 +152,11 @@ export function RomanticAudio() {
 
     try {
       document.addEventListener('visibilitychange', handleVisibilityChange);
+      // Safari older versions
+      (document as any).addEventListener?.('webkitvisibilitychange', handleVisibilityChange as EventListener);
       document.addEventListener('freeze', handleFreeze as EventListener);
+      // pagehide on both window and document for broader coverage
+      document.addEventListener('pagehide', handlePageHide as EventListener);
       window.addEventListener('pagehide', handlePageHide);
       window.addEventListener('beforeunload', handleBeforeUnload);
       window.addEventListener('blur', handleBlur);
@@ -156,7 +167,9 @@ export function RomanticAudio() {
     return () => {
       try {
         document.removeEventListener('visibilitychange', handleVisibilityChange);
+        (document as any).removeEventListener?.('webkitvisibilitychange', handleVisibilityChange as EventListener);
         document.removeEventListener('freeze', handleFreeze as EventListener);
+        document.removeEventListener('pagehide', handlePageHide as EventListener);
         window.removeEventListener('pagehide', handlePageHide);
         window.removeEventListener('beforeunload', handleBeforeUnload);
         window.removeEventListener('blur', handleBlur);

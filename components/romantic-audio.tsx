@@ -68,6 +68,35 @@ export function RomanticAudio() {
     audioRef.current.muted = isMuted;
   }, [isMuted]);
 
+  // Pause music when user leaves the browser/tab
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const handleVisibilityChange = () => {
+      if (!audioRef.current) return;
+
+      if (document.hidden) {
+        // User left the tab/browser - pause the music
+        audioRef.current.pause();
+        setIsPlaying(false);
+      } else {
+        // User returned to the tab - resume the music if it was playing
+        if (!isMuted) {
+          audioRef.current.play().catch(() => {
+            console.log('Failed to resume audio');
+          });
+          setIsPlaying(true);
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [isMuted]);
+
   const toggleMute = () => {
     setIsMuted(!isMuted);
   };

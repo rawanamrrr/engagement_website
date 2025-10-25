@@ -90,91 +90,56 @@ export function RomanticAudio() {
   useEffect(() => {
     if (typeof window === 'undefined' || typeof document === 'undefined') return;
 
-    const handleVisibilityChange = () => {
+    const pauseIfPlaying = () => {
       if (!audioRef.current) return;
-
       try {
-        if (document.hidden) {
-          // User left the tab/browser - save playing state and pause
-          const isCurrentlyPlaying = !audioRef.current.paused && !isMuted;
-          wasPlayingRef.current = isCurrentlyPlaying;
-          
-          if (isCurrentlyPlaying) {
-            audioRef.current.pause();
-            setIsPlaying(false);
-          }
-        } else {
-          // User returned to the tab - resume only if it was playing before
-          if (wasPlayingRef.current && !isMuted && audioRef.current.paused) {
-            const playPromise = audioRef.current.play();
-            if (playPromise !== undefined) {
-              playPromise
-                .then(() => setIsPlaying(true))
-                .catch((err) => {
-                  console.log('Failed to resume audio:', err);
-                  wasPlayingRef.current = false;
-                });
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Error in visibility change handler:', error);
-      }
-    };
-
-    // Also handle blur/focus events as backup
-    const handleBlur = () => {
-      if (!audioRef.current) return;
-      
-      try {
-        const isCurrentlyPlaying = !audioRef.current.paused && !isMuted;
-        wasPlayingRef.current = isCurrentlyPlaying;
-        
-        if (isCurrentlyPlaying) {
+        if (!audioRef.current.paused) {
           audioRef.current.pause();
+          wasPlayingRef.current = false;
           setIsPlaying(false);
         }
       } catch (error) {
-        console.error('Error in blur handler:', error);
+        console.error('Error while pausing audio:', error);
       }
     };
 
-    const handleFocus = () => {
-      if (!audioRef.current) return;
-      
-      try {
-        if (wasPlayingRef.current && !isMuted && audioRef.current.paused) {
-          const playPromise = audioRef.current.play();
-          if (playPromise !== undefined) {
-            playPromise
-              .then(() => setIsPlaying(true))
-              .catch((err) => {
-                console.log('Failed to resume audio:', err);
-                wasPlayingRef.current = false;
-              });
-          }
-        }
-      } catch (error) {
-        console.error('Error in focus handler:', error);
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        pauseIfPlaying();
       }
     };
 
-    // Add event listeners with proper error handling
+    const handlePageHide = () => {
+      // iOS Safari reliably fires pagehide on app switch/back/close
+      pauseIfPlaying();
+    };
+
+    const handleBeforeUnload = () => {
+      pauseIfPlaying();
+    };
+
+    const handleBlur = () => {
+      // Some browsers only fire blur when switching tabs
+      pauseIfPlaying();
+    };
+
     try {
       document.addEventListener('visibilitychange', handleVisibilityChange);
+      window.addEventListener('pagehide', handlePageHide);
+      window.addEventListener('beforeunload', handleBeforeUnload);
       window.addEventListener('blur', handleBlur);
-      window.addEventListener('focus', handleFocus);
     } catch (error) {
-      console.error('Error adding event listeners:', error);
+      console.error('Error adding pause listeners:', error);
     }
 
     return () => {
       try {
         document.removeEventListener('visibilitychange', handleVisibilityChange);
+        window.removeEventListener('pagehide', handlePageHide);
+        window.removeEventListener('beforeunload', handleBeforeUnload);
         window.removeEventListener('blur', handleBlur);
-        window.removeEventListener('focus', handleFocus);
       } catch (error) {
-        console.error('Error removing event listeners:', error);
+        console.error('Error removing pause listeners:', error);
       }
     };
   }, [isMuted]);

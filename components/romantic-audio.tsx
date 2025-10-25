@@ -9,6 +9,7 @@ export function RomanticAudio() {
   const [isMuted, setIsMuted] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const wasPlayingRef = useRef(false); // Track if music was playing before tab switch
   const t = useTranslation();
 
   // Handle first user interaction to start audio
@@ -76,24 +77,51 @@ export function RomanticAudio() {
       if (!audioRef.current) return;
 
       if (document.hidden) {
-        // User left the tab/browser - pause the music
-        audioRef.current.pause();
-        setIsPlaying(false);
+        // User left the tab/browser - save playing state and pause
+        wasPlayingRef.current = !audioRef.current.paused && !isMuted;
+        if (wasPlayingRef.current) {
+          audioRef.current.pause();
+          setIsPlaying(false);
+        }
       } else {
-        // User returned to the tab - resume the music if it was playing
-        if (!isMuted) {
-          audioRef.current.play().catch(() => {
-            console.log('Failed to resume audio');
+        // User returned to the tab - resume only if it was playing before
+        if (wasPlayingRef.current && !isMuted) {
+          audioRef.current.play().catch((err) => {
+            console.log('Failed to resume audio:', err);
           });
           setIsPlaying(true);
         }
       }
     };
 
+    // Also handle blur/focus events as backup
+    const handleBlur = () => {
+      if (!audioRef.current) return;
+      wasPlayingRef.current = !audioRef.current.paused && !isMuted;
+      if (wasPlayingRef.current) {
+        audioRef.current.pause();
+        setIsPlaying(false);
+      }
+    };
+
+    const handleFocus = () => {
+      if (!audioRef.current) return;
+      if (wasPlayingRef.current && !isMuted) {
+        audioRef.current.play().catch((err) => {
+          console.log('Failed to resume audio:', err);
+        });
+        setIsPlaying(true);
+      }
+    };
+
     document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('blur', handleBlur);
+    window.addEventListener('focus', handleFocus);
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('blur', handleBlur);
+      window.removeEventListener('focus', handleFocus);
     };
   }, [isMuted]);
 

@@ -19,6 +19,11 @@ export function RomanticAudio() {
     const handleFirstInteraction = async () => {
       if (audioRef.current && !isPlaying) {
         try {
+          // Restore src if it was cleared on background
+          if (!audioRef.current.src) {
+            audioRef.current.src = '/romantic-piano.mp3';
+            audioRef.current.load();
+          }
           audioRef.current.muted = false;
           await audioRef.current.play();
           setIsPlaying(true);
@@ -64,6 +69,11 @@ export function RomanticAudio() {
       }
     };
 
+    // Ensure src is present
+    if (!audio.src) {
+      audio.src = '/romantic-piano.mp3';
+    }
+
     // Add event listener for when audio is ready
     audio.addEventListener('canplay', handleCanPlay, { once: true });
 
@@ -92,12 +102,17 @@ export function RomanticAudio() {
 
     const pauseIfPlaying = () => {
       if (!audioRef.current) return;
+      const a = audioRef.current;
       try {
-        if (!audioRef.current.paused) {
-          audioRef.current.pause();
-          wasPlayingRef.current = false;
-          setIsPlaying(false);
-        }
+        // Force stop and silence in background across browsers
+        a.muted = true;
+        a.pause();
+        try { a.currentTime = 0; } catch {}
+        try { a.load(); } catch {}
+        wasPlayingRef.current = false;
+        setIsPlaying(false);
+        // Best effort: clear media session playback indicator when supported
+        try { (navigator as any)?.mediaSession && ((navigator as any).mediaSession.playbackState = 'none'); } catch {}
       } catch (error) {
         console.error('Error while pausing audio:', error);
       }
@@ -123,8 +138,14 @@ export function RomanticAudio() {
       pauseIfPlaying();
     };
 
+    const handleFreeze = () => {
+      // Chrome Page Lifecycle: tab is frozen
+      pauseIfPlaying();
+    };
+
     try {
       document.addEventListener('visibilitychange', handleVisibilityChange);
+      document.addEventListener('freeze', handleFreeze as EventListener);
       window.addEventListener('pagehide', handlePageHide);
       window.addEventListener('beforeunload', handleBeforeUnload);
       window.addEventListener('blur', handleBlur);
@@ -135,6 +156,7 @@ export function RomanticAudio() {
     return () => {
       try {
         document.removeEventListener('visibilitychange', handleVisibilityChange);
+        document.removeEventListener('freeze', handleFreeze as EventListener);
         window.removeEventListener('pagehide', handlePageHide);
         window.removeEventListener('beforeunload', handleBeforeUnload);
         window.removeEventListener('blur', handleBlur);
@@ -179,10 +201,7 @@ export function RomanticAudio() {
         playsInline
         preload="auto"
         className="hidden"
-      >
-        <source src="/romantic-piano.mp3" type="audio/mpeg" />
-        Your browser does not support the audio element.
-      </audio>
+      />
     </div>
   );
 }

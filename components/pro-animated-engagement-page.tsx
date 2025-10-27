@@ -363,14 +363,20 @@ export default function ProAnimatedEngagementPage({ onImageLoad, playGifTrigger 
         </motion.div>
         
         {/* Scroll Down Indicator - Flying from left */}
-        <motion.div
-          className="absolute bottom-12 left-8 flex flex-col items-center gap-3 z-20"
+        <motion.button
+          onClick={() => {
+            const countdownSection = document.querySelector('section[class*="py-20"]');
+            countdownSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }}
+          className="absolute bottom-12 left-8 flex flex-col items-center gap-3 z-20 cursor-pointer group"
           initial="hidden"
           animate="visible"
           variants={flyFromLeft}
           transition={{ delay: 0.8 }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
         >
-          <div className="bg-background/80 backdrop-blur-sm px-6 py-3 rounded-full shadow-lg border border-accent/30">
+          <div className="bg-background/80 backdrop-blur-sm px-6 py-3 rounded-full shadow-lg border border-accent/30 group-hover:border-accent/50 transition-colors">
             <span className="text-base md:text-lg text-foreground font-medium tracking-wide">
               {language === 'ar' ? 'مرر للأسفل' : 'Scroll Down'}
             </span>
@@ -382,7 +388,7 @@ export default function ProAnimatedEngagementPage({ onImageLoad, playGifTrigger 
               repeat: Infinity, 
               ease: "easeInOut" 
             }}
-            className="bg-accent/90 p-2 rounded-full shadow-lg"
+            className="bg-accent/90 p-2 rounded-full shadow-lg group-hover:bg-accent transition-colors"
           >
             <svg 
               className="w-8 h-8 text-white" 
@@ -398,7 +404,7 @@ export default function ProAnimatedEngagementPage({ onImageLoad, playGifTrigger 
               />
             </svg>
           </motion.div>
-        </motion.div>
+        </motion.button>
         
         {/* Animated floating background elements */}
         <motion.div 

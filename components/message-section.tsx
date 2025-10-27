@@ -47,7 +47,7 @@ export default function MessageSection() {
               </p>
               <a 
                 href="mailto:engagementzeyadrawan@gmail.com" 
-                className="inline-block px-6 py-3 bg-accent text-white rounded-full hover:bg-accent/90 transition-colors duration-300"
+                className="inline-block px-4 py-3 md:px-6 bg-accent text-white rounded-full hover:bg-accent/90 transition-colors duration-300 text-sm md:text-base break-all max-w-full"
               >
                 engagementzeyadrawan@gmail.com
               </a>

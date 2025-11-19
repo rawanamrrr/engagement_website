@@ -1,0 +1,6 @@
+# Netlify configuration for Next.js with nodemailer support
+
+[functions]
+  # Configure external node modules that should not be bundled
+  external_node_modules = ["nodemailer"]
+  node_bundler = "esbuild"

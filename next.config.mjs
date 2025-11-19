@@ -9,6 +9,7 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  serverExternalPackages: ['nodemailer'],
   // Add aggressive caching for static assets (GIF, images) on Netlify
   async headers() {
     return [

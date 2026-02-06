@@ -100,14 +100,6 @@ export async function POST(request: Request) {
           message,
           code: err?.code || null,
           provider: 'gmail',
-          envPresent: {
-            SMTP_USER: Boolean(process.env.SMTP_USER),
-            SMTP_PASS: Boolean(process.env.SMTP_PASS),
-            GMAIL_USER: Boolean(process.env.GMAIL_USER),
-            GMAIL_APP_PASSWORD: Boolean(process.env.GMAIL_APP_PASSWORD),
-            GOOGLE_APP_PASSWORD: Boolean(process.env.GOOGLE_APP_PASSWORD),
-            CONTACT_EMAIL: Boolean(process.env.CONTACT_EMAIL),
-          },
         },
         { status: 500 }
       );
